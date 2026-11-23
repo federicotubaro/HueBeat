@@ -1,0 +1,540 @@
+<!--
+  HueBeat - Octave & 432 Hz Visual Metronome
+  Copyright (c) 2026 Federico Tubaro
+  Distribuito sotto licenza PolyForm Noncommercial 1.0.0
+  SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+-->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Federico Tubaro">
+  <meta name="copyright" content="Copyright (c) 2026 Federico Tubaro - PolyForm Noncommercial 1.0.0">
+  <title>HueBeat — Octave & 432 Hz Visual Metronome</title>
+  <style>
+    :root {
+      --bg-color: hsl(120, 78%, 36%);
+      --text-color: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.08s linear;
+      padding: 20px;
+      user-select: none;
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 36px 28px 24px 28px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      opacity: 0.92;
+      margin-bottom: 24px;
+    }
+
+    .beat-indicator {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.25);
+      margin: 0 auto 20px auto;
+      transition: transform 0.04s ease, background-color 0.04s ease;
+    }
+
+    .beat-indicator.flash {
+      background-color: #ffffff;
+      transform: scale(1.45);
+      box-shadow: 0 0 20px #ffffff;
+    }
+
+    .bpm-display {
+      font-size: 4.2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+      font-variant-numeric: tabular-nums;
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 4px 12px;
+      display: inline-block;
+      transition: background 0.15s;
+    }
+
+    .bpm-display:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .bpm-input {
+      font-size: 4.2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+      width: 220px;
+      text-align: center;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.18);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      padding: 2px 8px;
+      outline: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bpm-label {
+      font-size: 0.9rem;
+      letter-spacing: 1.5px;
+      opacity: 0.8;
+      margin-bottom: 24px;
+    }
+
+    .metrics-box {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 28px;
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.75;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slider-group {
+      margin-bottom: 20px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #ffffff;
+      cursor: pointer;
+      height: 8px;
+      border-radius: 4px;
+    }
+
+    .fine-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .btn-small {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-small:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-octave {
+      background: rgba(255, 255, 255, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    .sound-selector {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .btn-sound {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      border-radius: 10px;
+      padding: 8px 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-sound.active {
+      background: rgba(255, 255, 255, 0.9);
+      color: #111;
+      border-color: #ffffff;
+    }
+
+    .btn-play {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #111;
+      background: #ffffff;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.15s;
+    }
+
+    .btn-play:active {
+      transform: scale(0.98);
+    }
+
+    .copyright-footer {
+      margin-top: 22px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 0.72rem;
+      line-height: 1.5;
+      opacity: 0.75;
+    }
+
+    .copyright-footer a {
+      color: #ffffff;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>HueBeat</h1>
+    
+    <div class="beat-indicator" id="beatDot"></div>
+
+    <div>
+      <div class="bpm-display" id="bpmText" title="Clicca per digitare i BPM">60</div>
+      <input type="text" inputmode="decimal" class="bpm-input" id="bpmInput" style="display: none;" aria-label="Inserisci BPM">
+    </div>
+    <div class="bpm-label">BPM</div>
+
+    <div class="metrics-box">
+      <div class="metric">
+        <span class="metric-title">Frequenza</span>
+        <span class="metric-value" id="hzText">1.00 Hz</span>
+      </div>
+      <div class="metric">
+        <span class="metric-title">Nota (LA 432 Hz)</span>
+        <span class="metric-value" id="noteText">DO</span>
+      </div>
+    </div>
+
+    <div class="slider-group">
+      <input type="range" id="bpmSlider" min="1" max="960" value="60" step="1">
+      <div class="fine-controls">
+        <button class="btn-small btn-octave" onclick="scaleBpm(0.5)" title="Dimezza BPM (Ottava inferiore)">÷2</button>
+        <button class="btn-small" onclick="adjustBpm(-1)">-1</button>
+        <button class="btn-small" onclick="setBpm(60)">60</button>
+        <button class="btn-small" onclick="setBpm(120)">120</button>
+        <button class="btn-small" onclick="adjustBpm(1)">+1</button>
+        <button class="btn-small btn-octave" onclick="scaleBpm(2)" title="Raddoppia BPM (Ottava superiore)">×2</button>
+      </div>
+    </div>
+    <div class="sound-selector" role="group" aria-label="Tipo di suono">
+      <button class="btn-sound active" id="snd-standard" onclick="setSound('standard')">Click</button>
+<button class="btn-sound" id="snd-heart" onclick="setSound('heart')" aria-label="Cuore" title="Cuore"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: -2px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>
+    </div>
+
+    <button class="btn-play" id="toggleBtn" onclick="toggleMetronome()">Avvia</button>
+
+    <div class="copyright-footer">
+      Copyright (c) 2026 <strong>Federico Tubaro</strong><br>
+      Licenza <a href="https://polyformproject.org" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a>
+    </div>
+  </div>
+
+  <script>
+    /*
+     * HueBeat - Octave & 432 Hz Visual Metronome
+     * Copyright (c) 2026 Federico Tubaro
+     * Distribuito sotto licenza PolyForm Noncommercial 1.0.0
+     * SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+     */
+
+    const NOTE_NAMES = new Array("DO", "DO#", "RE", "RE#", "MI", "FA", "FA#", "SOL", "SOL#", "LA", "LA#", "SI");
+    const A4_FREQ = 432.0;
+    const C0_FREQ = A4_FREQ * Math.pow(2, -4 - 9 / 12);
+
+    let bpm = 60;
+    let soundType = 'standard';
+    let isPlaying = false;
+    let timerId = null;
+    let nextExpectedTime = 0;
+    let audioCtx = null;
+
+    const bpmSlider = document.getElementById('bpmSlider');
+    const bpmText = document.getElementById('bpmText');
+    const bpmInput = document.getElementById('bpmInput');
+    const hzText = document.getElementById('hzText');
+    const noteText = document.getElementById('noteText');
+    const beatDot = document.getElementById('beatDot');
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    function setSound(type) {
+      soundType = type;
+      document.querySelectorAll('.btn-sound').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('snd-' + type).classList.add('active');
+    }
+
+    function formatBpm(val) {
+      return val >= 1 ? parseFloat(val.toFixed(2)).toString() : parseFloat(val.toFixed(4)).toString();
+    }
+
+    function formatHz(hz) {
+      if (hz >= 1) return hz.toFixed(2) + " Hz";
+      if (hz >= 0.1) return hz.toFixed(3) + " Hz";
+      if (hz >= 0.01) return hz.toFixed(4) + " Hz";
+      return hz.toFixed(5) + " Hz";
+    }
+
+    function wavelengthToRgb(nm) {
+      let r = 0, g = 0, b = 0, factor = 0;
+      if (nm >= 380 && nm < 440) { r = -(nm - 440) / 60; b = 1.0; }
+      else if (nm >= 440 && nm < 490) { g = (nm - 440) / 50; b = 1.0; }
+      else if (nm >= 490 && nm < 510) { g = 1.0; b = -(nm - 510) / 20; }
+      else if (nm >= 510 && nm < 580) { r = (nm - 510) / 70; g = 1.0; }
+      else if (nm >= 580 && nm < 645) { r = 1.0; g = -(nm - 645) / 65; }
+      else if (nm >= 645 && nm <= 780) { r = 1.0; }
+
+      if (nm >= 380 && nm < 420) factor = 0.35 + 0.65 * (nm - 380) / 40;
+      else if (nm >= 420 && nm <= 700) factor = 1.0;
+      else if (nm > 700 && nm <= 780) factor = 0.35 + 0.65 * (780 - nm) / 80;
+
+      const scale = (c) => c === 0 ? 0 : Math.round(185 * Math.pow(c * factor, 0.80));
+      return `rgb(${scale(r)}, ${scale(g)}, ${scale(b)})`;
+    }
+
+    function updatePhysics(currentBpm) {
+      const hz = currentBpm / 60.0;
+      const log2Hz = Math.log2(hz);
+      let centeredPhase = ((log2Hz % 1) + 1) % 1;
+      if (centeredPhase >= 0.5) centeredPhase -= 1.0;
+
+      const thz = 562.949953421312 * Math.pow(2, centeredPhase);
+      const wavelengthNm = 299792.458 / thz;
+      document.documentElement.style.setProperty('--bg-color', wavelengthToRgb(wavelengthNm));
+
+      const semitonesFromC0 = 12 * Math.log2(hz / C0_FREQ);
+      const nearestSemitone = Math.round(semitonesFromC0);
+      const idealFreq = C0_FREQ * Math.pow(2, nearestSemitone / 12);
+      const percentDiff = Math.abs(hz - idealFreq) / idealFreq;
+      const noteIndex = ((nearestSemitone % 12) + 12) % 12;
+
+      bpmText.textContent = formatBpm(currentBpm);
+      hzText.textContent = formatHz(hz);
+      noteText.textContent = (percentDiff > 0.025 ? "≈ " : "") + NOTE_NAMES[noteIndex];
+    }
+
+    function triggerHeartPulse(now, startFreq, endFreq, attack, duration, peakGain) {
+      const subOsc = audioCtx.createOscillator();
+      const subGain = audioCtx.createGain();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(startFreq, now);
+      subOsc.frequency.exponentialRampToValueAtTime(endFreq, now + duration);
+      subGain.gain.setValueAtTime(0.001, now);
+      subGain.gain.linearRampToValueAtTime(peakGain, now + attack);
+      subGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      subOsc.connect(subGain);
+      subGain.connect(audioCtx.destination);
+      subOsc.start(now);
+      subOsc.stop(now + duration + 0.01);
+
+      const bodyOsc = audioCtx.createOscillator();
+      const bodyGain = audioCtx.createGain();
+      bodyOsc.type = 'triangle';
+      bodyOsc.frequency.setValueAtTime(startFreq * 2.2, now);
+      bodyOsc.frequency.exponentialRampToValueAtTime(endFreq * 1.8, now + duration * 0.75);
+      bodyGain.gain.setValueAtTime(0.001, now);
+      bodyGain.gain.linearRampToValueAtTime(peakGain * 0.55, now + attack * 0.7);
+      bodyGain.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.75);
+      bodyOsc.connect(bodyGain);
+      bodyGain.connect(audioCtx.destination);
+      bodyOsc.start(now);
+      bodyOsc.stop(now + duration * 0.8);
+    }
+
+    let lastBeatTime = 0;
+
+    function playClick() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+
+      if (soundType === 'standard') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(864, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(0.6, now + 0.003);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.030);
+        gain.gain.linearRampToValueAtTime(0.0, now + 0.035);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.036);
+      } else if (soundType === 'heart') {
+        const effort = Math.min(1, Math.max(0, (bpm - 60) / 160));
+        const attack = 0.015 - (effort * 0.011);
+        const lubDur = 0.120 - (effort * 0.068);
+        const dubDur = 0.095 - (effort * 0.055);
+        const tension = 1 + (effort * 0.32);
+
+        triggerHeartPulse(now, 64.8 * tension, 32.4 * tension, attack, lubDur, 0.95);
+
+        const beatSec = 60 / bpm;
+        const systoleSec = Math.min(0.28, beatSec * 0.31);
+
+        if (beatSec > 0.14) {
+          triggerHeartPulse(now + systoleSec, 54.0 * tension, 27.0 * tension, attack * 0.85, dubDur, 0.72);
+          setTimeout(() => {
+            beatDot.classList.add('flash');
+            setTimeout(() => beatDot.classList.remove('flash'), 35);
+          }, systoleSec * 1000);
+        }
+      }
+
+      beatDot.classList.add('flash');
+      const flashDuration = Math.min(50, (60000 / bpm) * 0.45);
+      setTimeout(() => beatDot.classList.remove('flash'), flashDuration);
+    }
+
+    function schedulerTick() {
+      if (!isPlaying || bpm > 1200) {
+        timerId = null;
+        return;
+      }
+      const now = performance.now();
+      const intervalMs = 60000 / bpm;
+
+      if (now >= nextExpectedTime) {
+        playClick();
+        lastBeatTime = now;
+        nextExpectedTime += intervalMs;
+        if (nextExpectedTime < now) nextExpectedTime = now + intervalMs;
+      }
+
+      const delay = Math.max(1, nextExpectedTime - performance.now());
+      timerId = setTimeout(schedulerTick, delay);
+    }
+
+    function startLoop() {
+      if (timerId) clearTimeout(timerId);
+      nextExpectedTime = performance.now();
+      schedulerTick();
+    }
+
+    function toggleMetronome() {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        toggleBtn.textContent = "Ferma";
+        startLoop();
+      } else {
+        toggleBtn.textContent = "Avvia";
+        clearTimeout(timerId);
+        timerId = null;
+      }
+    }
+
+    function setBpm(newBpm) {
+      bpm = Math.max(0.0001, newBpm);
+      bpmSlider.value = Math.min(960, Math.max(1, Math.round(bpm)));
+      updatePhysics(bpm);
+
+      if (isPlaying) {
+        if (bpm > 1200) {
+          if (timerId) { clearTimeout(timerId); timerId = null; }
+        } else if (!timerId) {
+          startLoop();
+        } else {
+          const now = performance.now();
+          const newInterval = 60000 / bpm;
+          let candidate = lastBeatTime + newInterval;
+          while (candidate <= now + 5) {
+            candidate += newInterval;
+          }
+          nextExpectedTime = candidate;
+          clearTimeout(timerId);
+          timerId = setTimeout(schedulerTick, nextExpectedTime - now);
+        }
+      }
+    }
+
+    function adjustBpm(delta) { setBpm(Math.round(bpm) + delta); }
+    function scaleBpm(factor) { setBpm(bpm * factor); }
+
+    bpmText.addEventListener('click', () => {
+      bpmText.style.display = 'none';
+      bpmInput.style.display = 'inline-block';
+      bpmInput.value = formatBpm(bpm);
+      bpmInput.focus();
+      bpmInput.select();
+    });
+
+    function commitBpmInput() {
+      const parsed = parseFloat(bpmInput.value.replace(',', '.').trim());
+      bpmInput.style.display = 'none';
+      bpmText.style.display = 'inline-block';
+      if (!isNaN(parsed)) setBpm(parsed);
+    }
+
+    bpmInput.addEventListener('blur', commitBpmInput);
+    bpmInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') bpmInput.blur();
+      else if (e.key === 'Escape') {
+        bpmInput.style.display = 'none';
+        bpmText.style.display = 'inline-block';
+      }
+    });
+
+    bpmSlider.addEventListener('input', (e) => setBpm(parseFloat(e.target.value)));
+    updatePhysics(bpm);
+  </script>
+</body>
+</html>
