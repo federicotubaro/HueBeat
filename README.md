@@ -5,7 +5,7 @@
 **HueBeat** is an educational visual and acoustic metronome bringing sub-audible rhythm octaves (below 16 Hz, down to 1 Hz / 60 BPM and beyond) into the visible light spectrum. Doubling or halving BPM preserves the exact optical color (Green = C, 46 octaves above) and A=432 Hz pitch class, featuring physiological heartbeat synthesis to show how music physically connects sound, body, and light.
 
 ## Utilizzo Online / Live Demo
-👉 **[Apri HueBeat / Open HueBeat](https://federicotubaro.github.io/html/)**
+👉 **[Apri HueBeat / Open HueBeat](https://github.io/html/)**
 
 ## Licenza / License
 Copyright (c) 2026 **Federico Tubaro** — Distribuito sotto licenza **PolyForm Noncommercial 1.0.0** (`SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0`).
